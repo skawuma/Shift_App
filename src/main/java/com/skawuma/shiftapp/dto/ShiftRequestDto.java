@@ -11,7 +11,7 @@ import java.util.Set;
  * @project Shift-App
  * @date 10/9/25
  */
-public class CreateRequestDto {
+public class ShiftRequestDto {
     private String employeeName;
     private Set<DayOfWeek> requestedDays;
     private Shift shift;

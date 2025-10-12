@@ -13,7 +13,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "employee_requests")
-public class EmployeeRequest {
+public class ShiftRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class EmployeeRequest {
     private String adminComment;
 
     // constructors, getters, setters
-    public EmployeeRequest() {}
+    public ShiftRequest() {}
 
     // getters and setters omitted for brevity — generate them or use Lombok
     // ... (include all getters/setters)

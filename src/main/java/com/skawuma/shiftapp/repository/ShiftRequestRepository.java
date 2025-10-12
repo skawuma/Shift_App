@@ -1,6 +1,6 @@
 package com.skawuma.shiftapp.repository;
 
-import com.skawuma.shiftapp.model.EmployeeRequest;
+import com.skawuma.shiftapp.model.ShiftRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
  * @date 10/9/25
  */
 @Repository
-public interface EmployeeRequestRepository  extends JpaRepository<EmployeeRequest, Long> {
+public interface ShiftRequestRepository extends JpaRepository<ShiftRequest, Long> {
 }
