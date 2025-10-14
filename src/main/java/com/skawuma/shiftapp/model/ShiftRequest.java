@@ -1,8 +1,12 @@
 package com.skawuma.shiftapp.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.DayOfWeek;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,45 +16,29 @@ import java.util.Set;
  * @date 10/9/25
  */
 @Entity
-@Table(name = "employee_requests")
+@Table(name = "shift_requests")
+@Getter
+@Setter
+@NoArgsConstructor
 public class ShiftRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String employeeName; // could be employee id/email in real app
+    @ManyToOne
+    private User employee;
 
-    @ElementCollection(targetClass = DayOfWeek.class)
-    @CollectionTable(name = "request_days", joinColumns = @JoinColumn(name = "request_id"))
-    @Column(name = "day")
-    @Enumerated(EnumType.STRING)
-    private Set<DayOfWeek> requestedDays;
+    @ElementCollection
+    @CollectionTable(name="shift_request_days", joinColumns=@JoinColumn(name="shift_request_id"))
+    @Column(name="day")
+    private List<String> requestedDays;
 
-    @Enumerated(EnumType.STRING)
-    private Shift shift;
+    private String shift;
 
-    @Enumerated(EnumType.STRING)
-    private RequestStatus status = RequestStatus.PENDING;
+    private String status; // PENDING / APPROVED / REJECTED
 
+    @Column(length = 2000)
     private String adminComment;
-
-    // constructors, getters, setters
-    public ShiftRequest() {}
-
-    // getters and setters omitted for brevity — generate them or use Lombok
-    // ... (include all getters/setters)
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getEmployeeName() { return employeeName; }
-    public void setEmployeeName(String employeeName) { this.employeeName = employeeName; }
-    public Set<DayOfWeek> getRequestedDays() { return requestedDays; }
-    public void setRequestedDays(Set<DayOfWeek> requestedDays) { this.requestedDays = requestedDays; }
-    public Shift getShift() { return shift; }
-    public void setShift(Shift shift) { this.shift = shift; }
-    public RequestStatus getStatus() { return status; }
-    public void setStatus(RequestStatus status) { this.status = status; }
-    public String getAdminComment() { return adminComment; }
-    public void setAdminComment(String adminComment) { this.adminComment = adminComment; }
 
 }
