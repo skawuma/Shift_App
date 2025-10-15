@@ -6,10 +6,7 @@ import com.skawuma.shiftapp.dto.RegisterRequest;
 import com.skawuma.shiftapp.service.AuthService;
 import com.skawuma.shiftapp.service.EmailService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author samuelkawuma
@@ -20,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+//@CrossOrigin(origins = {"http://10.0.0.98:4200","http://192.168.25.119:4200"})
+
+
 public class AuthController {
     private  final AuthService authService;
     private final EmailService emailService;

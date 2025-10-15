@@ -74,7 +74,11 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // Origins allowed (you can list your production domain here)
-        config.setAllowedOrigins(List.of("http://localhost:4200", "https://evergreenctr.org"));
+        config.setAllowedOrigins(List.of("http://localhost:4200",
+                //dev purpose
+                "http://10.0.0.98:4200",
+                "http://192.168.25.119:4200",
+                "https://evergreenctr.org"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         config.setAllowCredentials(true); // Required for cookies/auth headers

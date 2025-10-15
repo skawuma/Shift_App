@@ -5,9 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author samuelkawuma
@@ -16,7 +15,10 @@ import java.util.Set;
  * @date 10/9/25
  */
 @Entity
-@Table(name = "shift_requests")
+@Table(
+        name = "shift_requests"
+//        ,uniqueConstraints = @UniqueConstraint(columnNames = {"employee_id", "shift"})
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,16 +31,20 @@ public class ShiftRequest {
     @ManyToOne
     private User employee;
 
+    /**
+     * Instead of days of week (like "Monday"), we now store
+     * specific calendar dates (e.g. 2025-10-20) using LocalDate.
+     * This allows the employee to select exact calendar days on the frontend.
+     */
     @ElementCollection
-    @CollectionTable(name="shift_request_days", joinColumns=@JoinColumn(name="shift_request_id"))
-    @Column(name="day")
-    private List<String> requestedDays;
+    @CollectionTable(name = "shift_request_dates", joinColumns = @JoinColumn(name = "shift_request_id"))
+    @Column(name = "requested_date")
+    private List<LocalDate> requestedDates;
 
-    private String shift;
+    private String shift; // 7am-3pm, 3pm-11pm, etc.
 
     private String status; // PENDING / APPROVED / REJECTED
 
     @Column(length = 2000)
     private String adminComment;
-
 }

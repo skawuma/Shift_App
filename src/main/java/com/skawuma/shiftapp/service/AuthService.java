@@ -45,7 +45,7 @@ public class AuthService {
 
         String token = jwtService.generateToken(u.getUsername(), Map.of("role", u.getRole(), "userId", u.getId()));
         System.out.println("Token: " + token);
-        return new AuthResponse(token, u.getRole(), u.getId(), u.getEmail());
+        return new AuthResponse(token, u.getRole(), u.getId(), u.getEmail(),u.getUsername());
     }
 
     public UserDto register(RegisterRequest req) {
@@ -55,7 +55,7 @@ public class AuthService {
         u.setUsername(req.getUsername());
         u.setEmail(req.getEmail());
         u.setPassword(encoder.encode(req.getPassword()));
-        u.setRole("EMPLOYEE");
+        u.setRole("ROLE_EMPLOYEE");
         User saved = userRepo.save(u);
         UserDto dto = new UserDto();
         dto.setId(saved.getId());

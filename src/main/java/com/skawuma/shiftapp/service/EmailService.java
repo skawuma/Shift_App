@@ -1,7 +1,9 @@
 package com.skawuma.shiftapp.service;
 
-import org.springframework.mail.SimpleMailMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
  * @project Shift-App
  * @date 10/12/25
  */
+
 @Service
 public class EmailService {
 
@@ -19,11 +22,33 @@ public class EmailService {
         this.sender = sender;
     }
 
+    // ✅ Simple text version
     public void sendSimple(String to, String subject, String body) {
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo(to);
-        msg.setSubject(subject);
-        msg.setText(body);
-        sender.send(msg);
+        try {
+            MimeMessage message = sender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(body, false); // plain text
+            helper.setFrom("noreply@shiftapp.local");
+            sender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send simple email: " + e.getMessage(), e);
+        }
+    }
+
+    // ✅ HTML version with styled formatting
+    public void sendHtml(String to, String subject, String htmlBody) {
+        try {
+            MimeMessage message = sender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true); // true = enable HTML
+            helper.setFrom("noreply@shiftapp.local");
+            sender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Failed to send HTML email: " + e.getMessage(), e);
+        }
     }
 }
