@@ -43,7 +43,7 @@ public class AdminInitializer {
                 // 🆕 Create default admin if not found
                 User admin = new User();
                 admin.setUsername(adminUsername);
-                admin.setEmail("admin@example.com");
+                admin.setEmail("success@samuelkawuma.com");
                 admin.setPassword(encoder.encode(adminPassword));
                 admin.setRole("ROLE_ADMIN");
                 userRepo.save(admin);
@@ -57,11 +57,11 @@ public class AdminInitializer {
                 }, () -> {
                     User employee = new User();
                     employee.setUsername("employee");
-                    employee.setEmail("employee@example.com");
+                    employee.setEmail("skawuma69@gmail.com");
                     employee.setPassword(encoder.encode("password123"));
                     employee.setRole("ROLE_EMPLOYEE");
                     userRepo.save(employee);
-                    System.out.println("👷 Default employee created (dev-only). username=employee, password=password123");
+                    System.out.println("👷 Default employee created (dev-only). username=employee");
                 });
             } else {
                 System.out.println("🚫 Skipping employee seed — running in non-dev profile.");

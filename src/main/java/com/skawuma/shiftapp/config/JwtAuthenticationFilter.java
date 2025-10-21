@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -27,53 +28,57 @@ import java.util.Optional;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+    private static final String BEARER = "Bearer ";
     private final JwtService jwtService;
     private final UserRepository userRepo;
+    private final AntPathMatcher matcher = new AntPathMatcher();
 
     public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepo) {
         this.jwtService = jwtService;
         this.userRepo = userRepo;
     }
 
+    // Skip authentication on public endpoints for performance
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        return matcher.match("/api/auth/**", path)
+                || matcher.match("/actuator/health", path)
+                || matcher.match("/error", path);
+    }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
 
-        // 1️⃣ Get the Authorization header
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        // 2️⃣ Skip if there’s no Bearer token
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (authHeader != null && authHeader.startsWith(BEARER)) {
+            String token = authHeader.substring(BEARER.length());
+            try {
+                String username = jwtService.extractUsername(token);
 
-        String token = authHeader.substring(7);
-        try {
-            // 3️⃣ Extract username from token
-            String username = jwtService.extractUsername(token);
-            Optional<User> userOpt = userRepo.findByUsername(username);
+                if (username != null) {
+                    Optional<User> userOpt = userRepo.findByUsername(username);
+                    if (userOpt.isPresent() && jwtService.isTokenValid(token, userOpt.get())) {
+                        User user = userOpt.get();
 
-            // 4️⃣ If user found and valid, authenticate
-            if (userOpt.isPresent()) {
-                User user = userOpt.get();
+                        var auth = new UsernamePasswordAuthenticationToken(
+                                user.getUsername(),
+                                null,
+                                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+                        );
 
-                var authentication = new UsernamePasswordAuthenticationToken(
-                        user.getUsername(),
-                        null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
-                );
-
-                // 5️⃣ Set authentication in context for this request
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
+                }
+            } catch (Exception ignored) {
+                // If token is invalid/expired, leave context unauthenticated.
+                // Downstream will return 403 via the entrypoint configured.
             }
-        } catch (Exception e) {
-            // Invalid token — we don’t stop the chain (graceful fail)
         }
 
-        // 6️⃣ Continue the request
-        filterChain.doFilter(request, response);
-
-
+        chain.doFilter(request, response);
     }
 }

@@ -4,8 +4,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 # Ignore all .properties files within a specific directory
-  src/main/resources/*.properties
-
+src/main/resources/*.properties
+*.env
 ### STS ###
 .apt_generated
 .classpath

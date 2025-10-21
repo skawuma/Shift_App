@@ -24,21 +24,19 @@ public class AuthService {
     private final UserRepository userRepo;
     private final BCryptPasswordEncoder encoder;
     private final JwtService jwtService;
+    private final EmailService emailService;
 
-    public AuthService(UserRepository userRepo, BCryptPasswordEncoder encoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepo, BCryptPasswordEncoder encoder, JwtService jwtService, EmailService emailService) {
         this.userRepo = userRepo;
         this.encoder = encoder;
         this.jwtService = jwtService;
+        this.emailService = emailService;
     }
 
     public AuthResponse login(AuthRequest req) {
         Optional<User> uOpt = userRepo.findByUsername(req.getUsername());
         if (uOpt.isEmpty()) throw new RuntimeException("Invalid credentials");
         User u = uOpt.get();
-        System.out.println("UserPassword Provided: " + req.getPassword());
-        System.out.println("UserPassword while logged in: " + u.getPassword());
-        System.out.println("Password matches: " + encoder.matches(req.getPassword(), u.getPassword()));
-        System.out.println(new BCryptPasswordEncoder().encode(req.getPassword()));
 
         if (!encoder.matches(req.getPassword(), u.getPassword())) throw new RuntimeException("Invalid credentials");
 
@@ -62,6 +60,24 @@ public class AuthService {
         dto.setUsername(saved.getUsername());
         dto.setEmail(saved.getEmail());
         dto.setRole(saved.getRole());
+
+        String htmlBody = """
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#333;">
+      <h2 style="color:#1976d2;">Welcome to Shift Scheduler</h2>
+      <p>Hi <b>%s</b>,</p>
+      <p>Your Account has been has been successfully created.
+      <span style="font-weight:bold;color:"></span>.</p>
+     
+      <br><br>
+      <p>Thank you,<br/>Shift Management Team</p>
+    </div>
+    """.formatted(saved.getUsername());
+        String subj = "Welcome to Shift Scheduler";
+        String to = dto.getEmail();
+
+
+        emailService.sendToEmployee(to,subj,htmlBody);
         return dto;
     }
 }
+
