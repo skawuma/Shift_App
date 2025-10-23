@@ -17,7 +17,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/requests")
-//@CrossOrigin(origins = "http://10.0.0.98:4200") // Allow your Angular frontend
 public class ShiftRequestController {
 
     private final ShiftRequestService service;

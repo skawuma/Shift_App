@@ -96,10 +96,7 @@ public class SecurityConfig {
         // Allow dev hosts and your production subdomain
         cfg.setAllowedOrigins(List.of(
                 "http://localhost:4200",
-                "http://127.0.0.1:4200",
-                "https://schedule.samuelkawuma.com",
-                "http://10.0.0.98:4200",
-                "http://samuels-macbook-pro.local:4200"
+                "https://schedule.samuelkawuma.com"
         ));
 
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
