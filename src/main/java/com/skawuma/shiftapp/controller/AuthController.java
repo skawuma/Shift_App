@@ -42,4 +42,10 @@ public class AuthController {
         emailService.sendSimple("admin@example.com", "New registration", "New user: " + userDto.getUsername() + " (" + userDto.getEmail() + ")");
         return ResponseEntity.ok(userDto);
     }
+
+    @GetMapping("/api/auth/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK");
+    }
+
 }
