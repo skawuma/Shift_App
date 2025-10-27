@@ -36,7 +36,7 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
         var userDto = authService.register(req);
         // notify admin(s)
-        emailService.sendSimple("success@samuelkawuma.com", "New registration", "New user: " + userDto.getUsername() + " (" + userDto.getEmail() + ")");
+        emailService.sendSimple("skawuma69@gmail.com", "New registration", "New user: " + userDto.getUsername() + " (" + userDto.getEmail() + ")");
         return ResponseEntity.ok(userDto);
     }
 
