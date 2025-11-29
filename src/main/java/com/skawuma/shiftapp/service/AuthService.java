@@ -47,37 +47,52 @@ public class AuthService {
     }
 
     public UserDto register(RegisterRequest req) {
-        if (userRepo.existsByUsername(req.getUsername())) throw new RuntimeException("Username exists");
-        if (userRepo.existsByEmail(req.getEmail())) throw new RuntimeException("Email exists");
+
+        // Validate unique username/email
+        if (userRepo.existsByUsername(req.getUsername()))
+            throw new RuntimeException("Username exists");
+        if (userRepo.existsByEmail(req.getEmail()))
+            throw new RuntimeException("Email exists");
+
+        // Create user
         User u = new User();
         u.setUsername(req.getUsername());
         u.setEmail(req.getEmail());
         u.setPassword(encoder.encode(req.getPassword()));
         u.setRole("ROLE_EMPLOYEE");
+
         User saved = userRepo.save(u);
+
+        // Prepare DTO
         UserDto dto = new UserDto();
         dto.setId(saved.getId());
         dto.setUsername(saved.getUsername());
         dto.setEmail(saved.getEmail());
         dto.setRole(saved.getRole());
 
+        // Prepare welcome email
         String htmlBody = """
-    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#333;">
-      <h2 style="color:#1976d2;">Welcome to Shift Scheduler</h2>
-      <p>Hi <b>%s</b>,</p>
-      <p>Your Account has been has been successfully created.
-      <span style="font-weight:bold;color:"></span>.</p>
-     
-      <br><br>
-      <p>Thank you,<br/>Shift Management Team</p>
-    </div>
-    """.formatted(saved.getUsername());
+        <div style="font-family:Arial,sans-serif;line-height:1.6;color:#333;">
+          <h2 style="color:#1976d2;">Welcome to Shift Scheduler</h2>
+          <p>Hi <b>%s</b>,</p>
+          <p>Your Account has been successfully created.</p>
+          <br><br>
+          <p>Thank you,<br/>Shift Management Team</p>
+        </div>
+        """.formatted(saved.getUsername());
+
         String subj = "Welcome to Shift Scheduler";
         String to = dto.getEmail();
 
+        // Prevent email errors from breaking registration
+        try {
+            emailService.sendToEmployee(to, subj, htmlBody);
+        } catch (Exception e) {
+            System.err.println("⚠ Email failed: " + e.getMessage());
+        }
 
-        emailService.sendToEmployee(to,subj,htmlBody);
         return dto;
     }
+
 }
 
