@@ -59,14 +59,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/api/health",    // ⭐ Required for Nginx health checks
                                 "/error",
-                                "/swagger-ui/**", "/v3/api-docs/**" // if you use Swagger
+                                "/swagger-ui/**", "/v3/api-docs/**"
                         ).permitAll()
-                        // (optional) make health info public if you expose it
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
+
 
                 // 401/403 JSON responses (not redirects)
                 .exceptionHandling(ex -> ex
