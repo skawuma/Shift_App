@@ -63,6 +63,8 @@ public class SecurityConfig {
                                 "/error",
                                 "/swagger-ui/**", "/v3/api-docs/**"
                         ).permitAll()
+                        .requestMatchers("/api/health").permitAll()
+
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
