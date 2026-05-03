@@ -43,6 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         return matcher.match("/api/auth/**", path)
+                || matcher.match("/api/health", path)
                 || matcher.match("/actuator/health", path)
                 || matcher.match("/error", path);
     }
@@ -64,10 +65,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     if (userOpt.isPresent() && jwtService.isTokenValid(token, userOpt.get())) {
                         User user = userOpt.get();
 
+                        String role = user.getRole();
+                        String authority = role != null && role.startsWith("ROLE_") ? role : "ROLE_" + role;
+
                         var auth = new UsernamePasswordAuthenticationToken(
                                 user.getUsername(),
                                 null,
-                                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
+                                List.of(new SimpleGrantedAuthority(authority))
                         );
 
                         SecurityContextHolder.getContext().setAuthentication(auth);

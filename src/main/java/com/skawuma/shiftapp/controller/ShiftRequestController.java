@@ -4,6 +4,8 @@ import com.skawuma.shiftapp.dto.ShiftRequestDto;
 import com.skawuma.shiftapp.service.ShiftRequestService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,14 +37,16 @@ public class ShiftRequestController {
      * }
      */
     @PostMapping
-    public ResponseEntity<ShiftRequestDto> submit(@RequestBody ShiftRequestDto dto) {
-        return ResponseEntity.ok(service.submit(dto));
+    @PreAuthorize("hasRole('EMPLOYEE')")
+    public ResponseEntity<ShiftRequestDto> submit(@RequestBody ShiftRequestDto dto, Authentication authentication) {
+        return ResponseEntity.ok(service.submit(dto, authentication.getName()));
     }
 
     /**
      * Admin fetches paginated shift requests, optionally filtered by status.
      */
     @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<ShiftRequestDto>> listAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -54,14 +58,16 @@ public class ShiftRequestController {
      * Employee fetches their own shift requests by userId.
      */
     @GetMapping("/user")
-    public ResponseEntity<List<ShiftRequestDto>> listByUser(@RequestParam Long userId) {
-        return ResponseEntity.ok(service.listByUser(userId));
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
+    public ResponseEntity<List<ShiftRequestDto>> listByUser(Authentication authentication) {
+        return ResponseEntity.ok(service.listByUser(authentication.getName()));
     }
 
     /**
      * Admin manually updates request status (custom comment allowed).
      */
     @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ShiftRequestDto> updateStatus(
             @PathVariable Long id,
             @RequestBody ShiftRequestDto dto) {
@@ -72,6 +78,7 @@ public class ShiftRequestController {
      * Convenience endpoint for approval (auto sets status = APPROVED)
      */
     @PutMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ShiftRequestDto> approve(
             @PathVariable Long id,
             @RequestBody(required = false) ShiftRequestDto dto) {
@@ -83,6 +90,7 @@ public class ShiftRequestController {
      * Convenience endpoint for rejection (auto sets status = REJECTED)
      */
     @PutMapping("/{id}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ShiftRequestDto> reject(
             @PathVariable Long id,
             @RequestBody(required = false) ShiftRequestDto dto) {

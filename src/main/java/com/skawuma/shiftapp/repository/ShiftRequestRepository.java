@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * @author samuelkawuma
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 @Repository
 public interface ShiftRequestRepository extends JpaRepository<ShiftRequest, Long> {
     boolean existsByEmployeeAndRequestedDatesContainsAndShift(User employee, LocalDate date, String shift);
+    List<ShiftRequest> findByEmployee_IdOrderByIdDesc(Long employeeId);
 
     Page<ShiftRequest> findByStatus(String status, Pageable pageable);
     Page<ShiftRequest> findByEmployee_UsernameContainingIgnoreCase(String username, Pageable pageable);

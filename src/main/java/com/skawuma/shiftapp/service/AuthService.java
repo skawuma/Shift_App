@@ -42,7 +42,6 @@ public class AuthService {
 
 
         String token = jwtService.generateToken(u.getUsername(), Map.of("role", u.getRole(), "userId", u.getId()));
-        System.out.println("Token: " + token);
         return new AuthResponse(token, u.getRole(), u.getId(), u.getEmail(),u.getUsername());
     }
 
@@ -95,4 +94,3 @@ public class AuthService {
     }
 
 }
-

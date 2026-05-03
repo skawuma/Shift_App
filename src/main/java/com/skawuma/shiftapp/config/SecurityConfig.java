@@ -2,6 +2,7 @@ package com.skawuma.shiftapp.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -11,7 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
-import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -67,13 +68,19 @@ public class SecurityConfig {
 
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/requests/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/requests/*/status").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/requests/*/approve").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/requests/*/reject").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/employee-requests/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/employee-requests/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
 
 
                 // 401/403 JSON responses (not redirects)
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new Http403ForbiddenEntryPoint()) // returns 403 if no/invalid auth
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                         .accessDeniedHandler(new AccessDeniedHandlerImpl())         // returns 403 if insufficient role
                 )
 

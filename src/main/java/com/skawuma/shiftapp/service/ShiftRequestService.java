@@ -37,9 +37,16 @@ public class ShiftRequestService {
     // ===========================
     // SUBMIT SHIFT REQUEST
     // ===========================
-    public ShiftRequestDto submit(ShiftRequestDto dto) {
-        User u = userRepo.findById(dto.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public ShiftRequestDto submit(ShiftRequestDto dto, String username) {
+        User u = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+
+        if (dto.getRequestedDates() == null || dto.getRequestedDates().isEmpty()) {
+            throw new RuntimeException("Select at least one requested date");
+        }
+        if (dto.getShift() == null || dto.getShift().isBlank()) {
+            throw new RuntimeException("Select a shift");
+        }
 
         // Validate to prevent duplicate requests for same date & shift
         for (LocalDate date : dto.getRequestedDates()) {
@@ -74,9 +81,11 @@ public class ShiftRequestService {
     // ===========================
     // USER-SPECIFIC LIST
     // ===========================
-    public List<ShiftRequestDto> listByUser(Long userId) {
-        return repo.findAll().stream()
-                .filter(r -> r.getEmployee().getId().equals(userId))
+    public List<ShiftRequestDto> listByUser(String username) {
+        User u = userRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
+
+        return repo.findByEmployee_IdOrderByIdDesc(u.getId()).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }

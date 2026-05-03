@@ -69,13 +69,13 @@ public class JwtService {
     /**
      * Validates token subject and expiration.
      */
-    public boolean isTokenValid(String token, Object user) {
+    public boolean isTokenValid(String token, com.skawuma.shiftapp.model.User user) {
         try {
             Jws<Claims> parsed = parseToken(token);
             String username = parsed.getBody().getSubject();
             Date exp = parsed.getBody().getExpiration();
             boolean notExpired = exp.after(new Date());
-            return username != null && notExpired;
+            return username != null && username.equals(user.getUsername()) && notExpired;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
