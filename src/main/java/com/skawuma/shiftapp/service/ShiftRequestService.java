@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -146,7 +147,7 @@ public class ShiftRequestService {
         ShiftRequestDto d = new ShiftRequestDto();
         d.setId(r.getId());
         d.setUserId(r.getEmployee().getId());
-        d.setRequestedDates(r.getRequestedDates());
+        d.setRequestedDates(r.getRequestedDates() == null ? List.of() : new ArrayList<>(r.getRequestedDates()));
         d.setShift(r.getShift());
         d.setStatus(r.getStatus());
         d.setAdminComment(r.getAdminComment());
