@@ -5,6 +5,8 @@ import com.skawuma.shiftapp.model.ShiftRequest;
 import com.skawuma.shiftapp.model.User;
 import com.skawuma.shiftapp.repository.ShiftRequestRepository;
 import com.skawuma.shiftapp.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ShiftRequestService {
+
+    private static final Logger log = LoggerFactory.getLogger(ShiftRequestService.class);
 
     private final ShiftRequestRepository repo;
     private final UserRepository userRepo;
@@ -97,17 +101,21 @@ public class ShiftRequestService {
     // ===========================
     // ADMIN UPDATES STATUS
     // ===========================
+    @Transactional
     public ShiftRequestDto updateStatus(Long id, String status, String adminComment) {
         ShiftRequest r = repo.findById(id).orElseThrow(() -> new RuntimeException("Request not found"));
         r.setStatus(status);
         r.setAdminComment(adminComment);
         ShiftRequest saved = repo.save(r);
+        List<LocalDate> requestedDates = saved.getRequestedDates() == null
+                ? List.of()
+                : new ArrayList<>(saved.getRequestedDates());
 
         // Send email notification
         String to = saved.getEmployee().getEmail();
         String subj = "Shift Request " + saved.getId() + " - " + status;
         String body = "Hi " + saved.getEmployee().getUsername() + ",\n\n" +
-                "Your shift request (" + saved.getRequestedDates() + " / " + saved.getShift() + ") is " + status +
+                "Your shift request (" + requestedDates + " / " + saved.getShift() + ") is " + status +
                 "\n\nComment: " + (adminComment == null ? "" : adminComment);
 
 
@@ -125,7 +133,7 @@ public class ShiftRequestService {
     </div>
     """.formatted(
                 saved.getEmployee().getUsername(),
-                saved.getRequestedDates(),
+                requestedDates,
                 saved.getShift(),
                 "APPROVED".equalsIgnoreCase(status) ? "green" : "red",
                 status,
@@ -135,7 +143,11 @@ public class ShiftRequestService {
         );
 
        // emailService.sendSimple(to, subj, body);
-        emailService.sendHtml(to, subj, htmlBody);
+        try {
+            emailService.sendHtml(to, subj, htmlBody);
+        } catch (RuntimeException e) {
+            log.warn("Shift request {} was {}, but notification email to {} failed", saved.getId(), status, to, e);
+        }
 
         return toDto(saved);
     }
