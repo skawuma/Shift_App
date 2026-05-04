@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -69,6 +70,7 @@ public class ShiftRequestService {
     // ===========================
     // PAGINATED LISTING
     // ===========================
+    @Transactional(readOnly = true)
     public Page<ShiftRequestDto> listAll(int page, int size, String status) {
         Pageable p = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         Page<ShiftRequest> pageEnt = (status == null || status.isBlank())
@@ -81,6 +83,7 @@ public class ShiftRequestService {
     // ===========================
     // USER-SPECIFIC LIST
     // ===========================
+    @Transactional(readOnly = true)
     public List<ShiftRequestDto> listByUser(String username) {
         User u = userRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Authenticated user not found"));
